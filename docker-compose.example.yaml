@@ -1,0 +1,52 @@
+# Beispiel: Toolbox neben einer bestehenden LibreChat-Compose betreiben.
+#
+# Diese Datei ist eine Vorlage, kein fertiges Deployment.
+# Entweder den toolbox-Block in die vorhandene Compose-Datei übernehmen oder
+# diese Datei per `include:` einbinden.
+#
+# Start:  docker compose -f docker-compose.example.yaml up -d
+
+networks:
+  # Internes Netz: kein Internetzugang. Nur api und toolbox hängen hier.
+  net_tools:
+    internal: true
+  # Vorhandene LibreChat-Netze – Namen an die eigene Installation anpassen.
+  net_ai:
+    external: true
+  net_www:
+    external: true
+
+services:
+  api:
+    # Platzhalter: hier steht normalerweise der bestehende LibreChat-Dienst.
+    # Entscheidend ist nur, dass er zusätzlich in net_tools liegt.
+    networks:
+      - net_www
+      - net_ai
+      - net_tools
+
+  toolbox:
+    container_name: toolbox
+    build:
+      context: .
+    restart: unless-stopped
+    networks:
+      - net_tools
+    environment:
+      - LIBRECHAT_URL=http://api:3080
+      - JWT_SECRET=${JWT_SECRET}
+      # Optional:
+      # - TOOLBOX_NAME=Redaktions-Toolbox
+      # - TOOLBOX_REVISION_AUTHOR=Redaktion
+      # - TOOLBOX_LIMIT_UEBERSCHRIFT=45
+    read_only: true
+    tmpfs:
+      - /tmp:size=1g,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2g
+    pids_limit: 256
+    depends_on:
+      - api

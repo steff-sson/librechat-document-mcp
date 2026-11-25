@@ -1,0 +1,24 @@
+# LibreChat-Konfiguration für die Toolbox
+#
+# Diesen Block in die vorhandene config/librechat.yaml übernehmen.
+# Danach: docker compose restart api
+
+mcpSettings:
+  # ACHTUNG: Wenn allowedDomains gesetzt ist, sind NUR diese Ziele erreichbar.
+  # Fehlt "toolbox", schlägt die Verbindung fehl mit:
+  #   Domain "http://toolbox:8080" is not allowed
+  allowedDomains:
+    - toolbox
+
+mcpServers:
+  toolbox:
+    type: streamable-http
+    url: "http://toolbox:8080/mcp"
+    timeout: 120000
+    initTimeout: 30000
+    headers:
+      X-User-Id: "{{LIBRECHAT_USER_ID}}"
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+    serverInstructions: |
+      Werkzeuge zur Dokumentverarbeitung. Dateinamen aus dem Chat können direkt
+      als file_id übergeben werden; die Toolbox löst sie auf.
